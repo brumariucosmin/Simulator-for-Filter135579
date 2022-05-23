@@ -1,0 +1,1323 @@
+classdef app1 < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                   matlab.ui.Figure
+        LoadButton                 matlab.ui.control.Button
+        UIAxes                     matlab.ui.control.UIAxes
+        TipFiltruLabel             matlab.ui.control.Label
+        TipFiltruDropDown          matlab.ui.control.DropDown
+        ResponseTypeDropDownLabel  matlab.ui.control.Label
+        ResponseTypeDropDown       matlab.ui.control.DropDown
+        FsEditFieldLabel           matlab.ui.control.Label
+        FsEditField                matlab.ui.control.NumericEditField
+        FcEditFieldLabel           matlab.ui.control.Label
+        FcEditField                matlab.ui.control.NumericEditField
+        OrdinEditFieldLabel        matlab.ui.control.Label
+        OrdinEditField             matlab.ui.control.NumericEditField
+        RpEditFieldLabel           matlab.ui.control.Label
+        RpEditField                matlab.ui.control.NumericEditField
+        RsEditFieldLabel           matlab.ui.control.Label
+        RsEditField                matlab.ui.control.NumericEditField
+        FcminEditFieldLabel        matlab.ui.control.Label
+        FcminEditField             matlab.ui.control.NumericEditField
+        FcmaxEditFieldLabel        matlab.ui.control.Label
+        FcmaxEditField             matlab.ui.control.NumericEditField
+        R1EditFieldLabel           matlab.ui.control.Label
+        R1EditField                matlab.ui.control.NumericEditField
+        R2EditFieldLabel           matlab.ui.control.Label
+        R2EditField                matlab.ui.control.NumericEditField
+        R3EditFieldLabel           matlab.ui.control.Label
+        R3EditField                matlab.ui.control.NumericEditField
+        V1EditFieldLabel           matlab.ui.control.Label
+        V1EditField                matlab.ui.control.NumericEditField
+        Image                      matlab.ui.control.Image
+        TextArea                   matlab.ui.control.TextArea
+        ClearButton                matlab.ui.control.Button
+    end
+
+    
+    properties (Access = private)
+         Schimb = 1 ;
+         Schimb1 = 1  ;
+         Schimb2 = 1  ;
+         Schimb3 = 1  ; % Description
+         Schimb4 = 1  ; % Description
+         Schimb5 = 1  ;
+    end
+    
+
+    
+    methods (Access = public)
+        
+        function  functie_butterworth_lowpass(app) 
+            
+            Ordin = app.OrdinEditField.Value;
+            Fc = app.FcEditField.Value;
+            Fs = app.FsEditField.Value;
+                  
+            [zb,pb,kb] = butter(Ordin,2*pi*Fc,'s');
+            [bb,ab] = zp2tf(zb,pb,kb);
+            [hb,wb] = freqs(bb,ab,Fs);
+            plot(app.UIAxes,wb/(2e9*pi),mag2db(abs(hb)));
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+           
+        end
+    end
+    
+    methods (Access = public)
+        
+        function functie_butterworth_bandpass(app)
+            
+            Fs = app.FsEditField.Value;
+            Ordin = app.OrdinEditField.Value;
+            Fcmin=app.FcminEditField.Value;
+            Fcmax=app.FcmaxEditField.Value;
+            Fn=Fs/2; %Frec lui Nisquit
+            
+            [ze,pe,ke] = butter( Ordin,2*pi*[Fcmin Fcmax]/Fn,'s');
+            [be,ae] = zp2tf(ze,pe,ke);
+            [he,we] = freqs(be,ae,Fs);
+            plot(app.UIAxes,we/(2e9*pi),mag2db(abs(he)))
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+                        
+        end
+        
+        function functie_butterworth_highpass(app)
+            
+            Ordin4 = app.OrdinEditField.Value;
+            Fc4 = app.FcEditField.Value;
+            Fs4 = app.FsEditField.Value;
+            Fn = Fs4/2;
+         
+                                                                           
+            [zb,pb,kb] = butter(Ordin4,2*pi*Fc4/Fn,"high",'s');
+            [bb,ab] = zp2tf(zb,pb,kb);
+            [hb,wb] = freqs(bb,ab,Fs4);
+            plot(app.UIAxes,wb/(2e9*pi),mag2db(abs(hb)));
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+    end
+    
+    
+    methods (Access = private)
+        
+        function functie_butterworth_bandstop(app)
+            Fs = app.FsEditField.Value;
+            Ordin = app.OrdinEditField.Value;
+            Fcmin=app.FcminEditField.Value;
+            Fcmax=app.FcmaxEditField.Value;
+            [zb,pb,kb] = butter(Ordin,2*pi*[Fcmin Fcmax],'stop','s');
+            [bb,ab] = zp2tf(zb,pb,kb);
+            [hb,wb] = freqs(bb,ab,Fs);
+            plot(app.UIAxes,wb/(2e9*pi),mag2db(abs(hb)));
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+            
+        end
+        
+        function functie_cheby1_lowpass(app)
+            Fs = app.FsEditField.Value;
+            Ordin = app.OrdinEditField.Value;
+            Rp=app.RpEditField.Value;
+            Fc = app.FcEditField.Value;
+            
+            [z1,p1,k1] = cheby1(Ordin,Rp,2*pi*Fc,'s');
+            [b1,a1] = zp2tf(z1,p1,k1);
+            [h1,w1] = freqs(b1,a1,Fs);
+            plot(app.UIAxes,w1/(2e9*pi),mag2db(abs(h1)))
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function functie_cheby1_bandpass(app)
+            Fcmin=app.FcminEditField.Value;
+            Fcmax=app.FcmaxEditField.Value;            
+            Fs = app.FsEditField.Value;
+            Ordin = app.OrdinEditField.Value;
+            Rp=app.RpEditField.Value;
+            Fn=Fs/2; %Frec lui Nisquit
+            
+            [z1,p1,k1] = cheby1(Ordin,Rp,2*pi*[Fcmin Fcmax]/Fn,'s');
+            [b1,a1] = zp2tf(z1,p1,k1);
+            [h1,w1] = freqs(b1,a1,Fs);
+            plot(app.UIAxes,w1/(2e9*pi),mag2db(abs(h1)))
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+            
+        end
+        
+        function functie_cheby1_highpass(app)
+          Fs = app.FsEditField.Value;
+          Ordin = app.OrdinEditField.Value;
+          Rp=app.RpEditField.Value;
+          Fc = app.FcEditField.Value;
+          Fn=Fs/2; %Frec lui Nisquit
+          
+          [z1,p1,k1] = cheby1(Ordin,Rp,2*pi*Fc/Fn,'high','s');
+           [b1,a1] = zp2tf(z1,p1,k1);
+           [h1,w1] = freqs(b1,a1,Fs);
+           plot(app.UIAxes,w1/(2e9*pi),mag2db(abs(h1)))  
+           xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function functie_cheby1_bandstop(app)
+          Fcmin=app.FcminEditField.Value;
+          Fcmax=app.FcmaxEditField.Value;          
+          Ordin = app.OrdinEditField.Value;
+          Fs=app.FsEditField.Value;
+          Rp=app.RpEditField.Value;          
+          [z1,p1,k1] = cheby1(Ordin,Rp,2*pi*[Fcmin Fcmax],'stop','s');
+            [b1,a1] = zp2tf(z1,p1,k1);
+            [h1,w1] = freqs(b1,a1,Fs);
+            plot(app.UIAxes,w1/(2e9*pi),mag2db(abs(h1)))
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function functie_cheby2_lowpass(app)
+            Fs = app.FsEditField.Value;
+            Ordin = app.OrdinEditField.Value;
+            Rs=app.RsEditField.Value;
+            Fc = app.FcEditField.Value;
+           
+            [z2,p2,k2] = cheby2(Ordin,Rs,2*pi*Fc,'s');
+            [b2,a2] = zp2tf(z2,p2,k2);
+            [h2,w2] = freqs(b2,a2,Fs);
+            plot(app.UIAxes,w2/(2e9*pi),mag2db(abs(h2)))
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function functie_cheby2_bandpass(app)
+            Fcmin=app.FcminEditField.Value;
+            Fcmax=app.FcmaxEditField.Value;
+            Fs = app.FsEditField.Value;
+            Ordin = app.OrdinEditField.Value;
+            Rs=app.RsEditField.Value;
+            Fn=Fs/2; %Frec lui Nisquit
+         
+             [z2,p2,k2] = cheby2(Ordin,Rs,2*pi*[Fcmin Fcmax]/Fn,'s');
+            [b2,a2] = zp2tf(z2,p2,k2);
+            [h2,w2] = freqs(b2,a2,Fs);
+            plot(app.UIAxes,w2/(2e9*pi),mag2db(abs(h2)))
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function functie_cheby2_highpass(app)
+          Fs = app.FsEditField.Value;
+          Ordin = app.OrdinEditField.Value;
+          Rs=app.RsEditField.Value;
+          Fc = app.FcEditField.Value;
+          Fn=Fs/2; %Frec lui Nisquit
+          
+             [z2,p2,k2] = cheby2(Ordin,Rs,2*pi*Fc/Fn,'high','s');
+            [b2,a2] = zp2tf(z2,p2,k2);
+            [h2,w2] = freqs(b2,a2,Fs);
+            plot(app.UIAxes,w2/(2e9*pi),mag2db(abs(h2)))
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function functie_cheby2_bandstop(app)
+          Fcmin=app.FcminEditField.Value;
+          Fcmax=app.FcmaxEditField.Value;
+          Fs = app.FsEditField.Value;
+          Ordin = app.OrdinEditField.Value;
+          Rs=app.RsEditField.Value;
+          Fn=Fs/2; %Frec lui Nisquit          
+         
+          [z2,p2,k2] = cheby2(Ordin,Rs,2*pi*[Fcmin Fcmax],'stop','s');
+            [b2,a2] = zp2tf(z2,p2,k2);
+            [h2,w2] = freqs(b2,a2,Fs);
+            plot(app.UIAxes,w2/(2e9*pi),mag2db(abs(h2)))
+            xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function functie_eliptic_lowpass(app)
+          Fs = app.FsEditField.Value;
+          Ordin = app.OrdinEditField.Value;
+          Fc = app.FcEditField.Value;
+          Rp=app.RpEditField.Value;
+          Rs=app.RsEditField.Value;
+         
+          [ze,pe,ke] = ellip(Ordin,Rp,Rs,2*pi*Fc,'s');
+          [be,ae] = zp2tf(ze,pe,ke);
+          [he,we] = freqs(be,ae,Fs);
+          plot(app.UIAxes,we/(2e9*pi),mag2db(abs(he)));
+          xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function functie_eliptic_bandstop(app)
+          Ordin = app.OrdinEditField.Value;          
+          Rp=app.RpEditField.Value;
+          Rs=app.RsEditField.Value;
+          Fcmin=app.FcminEditField.Value;
+          Fcmax=app.FcmaxEditField.Value;
+          Fs=app.FsEditField.Value;
+          [ze,pe,ke] = ellip(Ordin,Rp,Rs,2*pi*[Fcmin Fcmax],'stop','s');
+          [be,ae] = zp2tf(ze,pe,ke);
+          [he,we] = freqs(be,ae,Fs);
+          plot(app.UIAxes,we/(2e9*pi),mag2db(abs(he)));
+          xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function functie_eliptic_bandpass(app)
+          Fs = app.FsEditField.Value;
+          Ordin = app.OrdinEditField.Value;          
+          Rp=app.RpEditField.Value;
+          Rs=app.RsEditField.Value;
+          Fcmin=app.FcminEditField.Value;
+          Fcmax=app.FcmaxEditField.Value;
+          Fn=Fs/2;
+          
+          [ze,pe,ke] = ellip(Ordin,Rp,Rs,2*pi*[Fcmin Fcmax]/Fn,'s');
+          [be,ae] = zp2tf(ze,pe,ke);
+          [he,we] = freqs(be,ae,Fs);
+          plot(app.UIAxes,we/(2e9*pi),mag2db(abs(he)));
+          xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function functie_eliptic_highpass(app)
+          Ordin = app.OrdinEditField.Value; 
+          Fs = app.FsEditField.Value;
+          Rp=app.RpEditField.Value;
+          Rs=app.RsEditField.Value;
+          Fc = app.FcEditField.Value;
+          Fn=Fs/2;
+          [ze,pe,ke] = ellip(Ordin,Rp,Rs,2*pi*Fc/Fn,'high','s');
+          [be,ae] = zp2tf(ze,pe,ke);
+          [he,we] = freqs(be,ae,Fs);
+          plot(app.UIAxes,we/(2e9*pi),mag2db(abs(he)));
+          xlabel(app.UIAxes,'Frequency ')
+            ylabel(app.UIAxes,'Attenuation ')
+            title(app.UIAxes,'Frequency vs Attenuation')
+        end
+        
+        function simulare_circuit_1(app)
+       
+        R1 = app.R1EditField.Value;
+        R2 = app.R2EditField.Value;
+        R3 = app.R3EditField.Value;
+        V1 = app.V1EditField.Value;
+        double Vc;
+        Vo = ((R2 + R3)/R2)*V1;
+        Vn = (R3/(R2 + R3))*Vo;        
+        Vp = (R3/(R2 + R3))*Vo; 
+         app.TextArea.Value{1} = sprintf('Vo e egal cu ')
+         app.TextArea.Value{2} = sprintf('%.3f',Vo);  % converts from numeric to char              
+         app.TextArea.Value{3} = sprintf('Vn e egal cu')
+         app.TextArea.Value{4} = sprintf('%.3f',Vn);  % converts from numeric to char 
+         app.TextArea.Value{5} = sprintf('Vp e egal cu')
+         app.TextArea.Value{6} = sprintf('%.3f',Vp);  % converts from numeric to char 
+         
+         x = linspace(0.01, 2*pi, 1500);
+         period = pi/4;
+         y = Vo* sin(2 * pi * x / period);
+         
+         
+         x1 = linspace(0.01, 2*pi, 1500);
+         period = pi/4;
+         y1 = Vn* sin(2 * pi * x1 / period);
+         
+         
+         x2 = linspace(0.01, 2*pi, 1500);
+         period = pi/4;
+         y2 = Vp* sin(2 * pi * x2 / period);
+         plot(app.UIAxes ,x2, y2);
+         hold on;
+         plot(app.UIAxes ,x1, y1);
+         plot(app.UIAxes ,x, y);
+         
+         xlabel(app.UIAxes,'time (s)')
+         ylabel(app.UIAxes,'voltage (V)')
+         title(app.UIAxes,'Voltage vs time')
+        
+        end
+    end
+
+    
+    
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: LoadButton
+        function LoadButtonPushed(app, event)
+        
+        if app.Schimb == 1
+            if app.Schimb1 == 1
+                functie_butterworth_lowpass(app)  
+            end
+        end
+        
+        if app.Schimb == 1
+            if app.Schimb1 == 2
+                functie_butterworth_bandstop(app) 
+            end
+        end
+        
+        if app.Schimb == 1
+            if app.Schimb1 == 3
+                functie_butterworth_bandpass(app) 
+            end
+        end
+        
+        if app.Schimb == 1
+            if app.Schimb1 == 4
+                functie_butterworth_highpass(app) 
+            end
+        end
+        
+        if app.Schimb == 2
+            if app.Schimb2 == 1
+                functie_cheby1_lowpass(app)
+            end
+        end
+        
+         if app.Schimb == 2
+            if app.Schimb2 == 2
+                functie_cheby1_bandstop(app);
+            end
+         end
+         
+        if app.Schimb == 2
+            if app.Schimb2 == 3
+                functie_cheby1_bandpass(app)
+            end
+        end
+        
+         if app.Schimb == 2
+            if app.Schimb2 == 4
+                functie_cheby1_highpass(app);
+            end
+         end
+         
+         if app.Schimb == 3
+            if app.Schimb3 == 1
+                functie_cheby2_lowpass(app)
+            end
+        end
+        
+         if app.Schimb == 3
+            if app.Schimb3 == 2
+                functie_cheby2_bandstop(app);
+            end
+         end
+         
+        if app.Schimb == 3
+            if app.Schimb3 == 3
+                functie_cheby2_bandpass(app)
+            end
+        end
+        
+         if app.Schimb == 3
+            if app.Schimb3 == 4
+                functie_cheby2_highpass(app);
+            end
+         end
+         
+         if app.Schimb == 4
+            if app.Schimb4 == 1
+                functie_eliptic_lowpass(app);
+            end
+        end
+        
+         if app.Schimb == 4
+            if app.Schimb4 == 2
+                functie_eliptic_bandstop(app);
+            end
+         end
+         
+        if app.Schimb == 4
+            if app.Schimb4 == 3
+                functie_eliptic_bandpass(app);
+            end
+        end
+        
+         if app.Schimb == 4
+            if app.Schimb4 == 4
+                functie_eliptic_highpass(app);
+            end
+        end
+        if app.Schimb == 5
+            if app.Schimb5 == 1
+                simulare_circuit_1(app);
+        
+            end
+        end
+        
+        end
+
+        % Value changed function: ResponseTypeDropDown, 
+        % TipFiltruDropDown
+        function TipFiltruDropDownValueChanged(app, event)
+            value = app.TipFiltruDropDown.Value;
+            
+             switch value   
+                 case  'Butterworth'
+      
+                    
+                   app.Schimb = 1;
+            
+                 case 'Chebyshev I'
+
+                    app.Schimb = 2;
+            
+                 case  'Chebyshev II'
+           
+                    app.Schimb = 3;
+                 case  'Eliptic'
+            
+                    app.Schimb = 4;
+                 case 'Simulare1'
+                     
+                    app.Schimb = 5; 
+             end
+             if app.Schimb == 5
+                 value1 = app.ResponseTypeDropDown.Value;
+                 switch value1 
+                     case 'Low-Pass'
+                        app.Schimb5 = 1;
+                        app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                        app.FsEditField.Visible = 'off';
+                        app.FsEditFieldLabel.Visible = 'off';
+                        app.FcEditField.Visible = 'off';
+                        app.FcEditFieldLabel.Visible = 'off';
+                        app.OrdinEditField.Visible = 'off';                  
+                        app.OrdinEditFieldLabel.Visible = 'off';
+                        app.RpEditField.Visible = 'off';                  
+                        app.RpEditFieldLabel.Visible = 'off';
+                        app.RsEditField.Visible = 'off';                  
+                        app.RsEditFieldLabel.Visible = 'off';
+                        app.R1EditField.Visible = 'on';
+                        app.R1EditFieldLabel.Visible = 'on';
+                        app.R2EditField.Visible = 'on';
+                        app.R2EditFieldLabel.Visible = 'on';
+                        app.R3EditField.Visible = 'on';
+                        app.R3EditFieldLabel.Visible = 'on';
+                        app.V1EditField.Visible = 'on';
+                        app.V1EditFieldLabel.Visible = 'on';
+                        app.Image.Visible = 'on';
+                        app.TextArea.Visible = 'on';
+                        app.ResponseTypeDropDown.Visible = 'off';
+                        app.ResponseTypeDropDownLabel.Visible = 'off';
+                        
+                         case 'Band-Stop'   
+                        app.Schimb5 = 1;
+                        app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                        app.FsEditField.Visible = 'off';
+                        app.FsEditFieldLabel.Visible = 'off';
+                        app.FcEditField.Visible = 'off';
+                        app.FcEditFieldLabel.Visible = 'off';
+                        app.OrdinEditField.Visible = 'off';                  
+                        app.OrdinEditFieldLabel.Visible = 'off';
+                        app.RpEditField.Visible = 'off';                  
+                        app.RpEditFieldLabel.Visible = 'off';
+                        app.RsEditField.Visible = 'off';                  
+                        app.RsEditFieldLabel.Visible = 'off';
+                        app.R1EditField.Visible = 'on';
+                        app.R1EditFieldLabel.Visible = 'on';
+                        app.R2EditField.Visible = 'on';
+                        app.R2EditFieldLabel.Visible = 'on';
+                        app.R3EditField.Visible = 'on';
+                        app.R3EditFieldLabel.Visible = 'on';
+                        app.V1EditField.Visible = 'on';
+                        app.V1EditFieldLabel.Visible = 'on';
+                        app.Image.Visible = 'on';
+                        app.TextArea.Visible = 'on';
+                        app.ResponseTypeDropDown.Visible = 'off';
+                        app.ResponseTypeDropDownLabel.Visible = 'off';
+                        
+                    case 'Band-Pass' 
+                       app.Schimb5 = 1;
+                        app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                        app.FsEditField.Visible = 'off';
+                        app.FsEditFieldLabel.Visible = 'off';
+                        app.FcEditField.Visible = 'off';
+                        app.FcEditFieldLabel.Visible = 'off';
+                        app.OrdinEditField.Visible = 'off';                  
+                        app.OrdinEditFieldLabel.Visible = 'off';
+                        app.RpEditField.Visible = 'off';                  
+                        app.RpEditFieldLabel.Visible = 'off';
+                        app.RsEditField.Visible = 'off';                  
+                        app.RsEditFieldLabel.Visible = 'off';
+                        app.R1EditField.Visible = 'on';
+                        app.R1EditFieldLabel.Visible = 'on';
+                        app.R2EditField.Visible = 'on';
+                        app.R2EditFieldLabel.Visible = 'on';
+                        app.R3EditField.Visible = 'on';
+                        app.R3EditFieldLabel.Visible = 'on';
+                        app.V1EditField.Visible = 'on';
+                        app.V1EditFieldLabel.Visible = 'on';
+                        app.Image.Visible = 'on';
+                        app.TextArea.Visible = 'on';
+                        app.ResponseTypeDropDown.Visible = 'off';
+                        app.ResponseTypeDropDownLabel.Visible = 'off';
+                        
+                    case 'High-Pass'
+                       app.Schimb5 = 1;
+                        app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                        app.FsEditField.Visible = 'off';
+                        app.FsEditFieldLabel.Visible = 'off';
+                        app.FcEditField.Visible = 'off';
+                        app.FcEditFieldLabel.Visible = 'off';
+                        app.OrdinEditField.Visible = 'off';                  
+                        app.OrdinEditFieldLabel.Visible = 'off';
+                        app.RpEditField.Visible = 'off';                  
+                        app.RpEditFieldLabel.Visible = 'off';
+                        app.RsEditField.Visible = 'off';                  
+                        app.RsEditFieldLabel.Visible = 'off';
+                        app.R1EditField.Visible = 'on';
+                        app.R1EditFieldLabel.Visible = 'on';
+                        app.R2EditField.Visible = 'on';
+                        app.R2EditFieldLabel.Visible = 'on';
+                        app.R3EditField.Visible = 'on';
+                        app.R3EditFieldLabel.Visible = 'on';
+                        app.V1EditField.Visible = 'on';
+                        app.V1EditFieldLabel.Visible = 'on';
+                        app.Image.Visible = 'on';
+                        app.TextArea.Visible = 'on';
+                        app.ResponseTypeDropDown.Visible = 'off';
+                        app.ResponseTypeDropDownLabel.Visible = 'off';
+                        
+                 end
+             end
+             if app.Schimb == 4
+                value1 = app.ResponseTypeDropDown.Value;
+                switch value1 
+                    case 'Low-Pass'
+                        app.Schimb4 = 1;
+                        app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'on';
+                        app.FcEditFieldLabel.Visible = 'on';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'on';                  
+                        app.RpEditFieldLabel.Visible = 'on';
+                        app.RsEditField.Visible = 'on';                  
+                        app.RsEditFieldLabel.Visible = 'on';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                         app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                    case 'Band-Stop'   
+                        app.Schimb4 = 2;
+                        app.FcminEditField.Visible = 'on';
+                        app.FcminEditFieldLabel.Visible = 'on';
+                        app.FcmaxEditField.Visible = 'on';
+                        app.FcmaxEditFieldLabel.Visible = 'on';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'off';
+                        app.FcEditFieldLabel.Visible = 'off';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'on';                  
+                        app.RpEditFieldLabel.Visible = 'on';
+                        app.RsEditField.Visible = 'on';                  
+                        app.RsEditFieldLabel.Visible = 'on';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                    case 'Band-Pass' 
+                        app.Schimb4 = 3;
+                        app.FcminEditField.Visible = 'on';
+                        app.FcminEditFieldLabel.Visible = 'on';
+                        app.FcmaxEditField.Visible = 'on';
+                        app.FcmaxEditFieldLabel.Visible = 'on';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'off';
+                        app.FcEditFieldLabel.Visible = 'off';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'on';                  
+                        app.RpEditFieldLabel.Visible = 'on';
+                        app.RsEditField.Visible = 'on';                  
+                        app.RsEditFieldLabel.Visible = 'on';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                    case 'High-Pass'
+                        app.Schimb4 = 4;
+                        app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'on';
+                        app.FcEditFieldLabel.Visible = 'on';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'on';                  
+                        app.RpEditFieldLabel.Visible = 'on';
+                        app.RsEditField.Visible = 'on';                  
+                        app.RsEditFieldLabel.Visible = 'on';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                     
+                        
+                end
+             end
+             
+             if app.Schimb == 3
+                value1 = app.ResponseTypeDropDown.Value;
+                switch value1 
+                    case 'Low-Pass'
+                        app.Schimb3 = 1;
+                        app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'on';
+                        app.FcEditFieldLabel.Visible = 'on';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'off';                  
+                        app.RpEditFieldLabel.Visible = 'off';
+                        app.RsEditField.Visible = 'on';                  
+                        app.RsEditFieldLabel.Visible = 'on';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                    case 'Band-Stop'   
+                        app.Schimb3 = 2;
+                        app.FcminEditField.Visible = 'on';
+                        app.FcminEditFieldLabel.Visible = 'on';
+                        app.FcmaxEditField.Visible = 'on';
+                        app.FcmaxEditFieldLabel.Visible = 'on';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'off';
+                        app.FcEditFieldLabel.Visible = 'off';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'off';                  
+                        app.RpEditFieldLabel.Visible = 'off';
+                        app.RsEditField.Visible = 'on';                  
+                        app.RsEditFieldLabel.Visible = 'on';
+                         app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                    case 'Band-Pass' 
+                        app.Schimb3 = 3;
+                        app.FcminEditField.Visible = 'on';
+                        app.FcminEditFieldLabel.Visible = 'on';
+                        app.FcmaxEditField.Visible = 'on';
+                        app.FcmaxEditFieldLabel.Visible = 'on';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'off';
+                        app.FcEditFieldLabel.Visible = 'off';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'off';                  
+                        app.RpEditFieldLabel.Visible = 'off';
+                        app.RsEditField.Visible = 'on';                  
+                        app.RsEditFieldLabel.Visible = 'on';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                    case 'High-Pass'
+                        app.Schimb3 = 4; 
+                        app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'on';
+                        app.FcEditFieldLabel.Visible = 'on';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'off';                  
+                        app.RpEditFieldLabel.Visible = 'off';
+                        app.RsEditField.Visible = 'on';                  
+                        app.RsEditFieldLabel.Visible = 'on';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                     
+                        
+                end
+             end
+             
+        if app.Schimb == 2
+                value1 = app.ResponseTypeDropDown.Value;
+                switch value1 
+                    case 'Low-Pass'
+                        app.Schimb2 = 1;
+                        app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'on';
+                        app.FcEditFieldLabel.Visible = 'on';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'on';                  
+                        app.RpEditFieldLabel.Visible = 'on';
+                        app.RsEditField.Visible = 'off';                  
+                        app.RsEditFieldLabel.Visible = 'off';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                    case 'Band-Stop'   
+                        app.Schimb2 = 2;
+                        app.FcminEditField.Visible = 'on';
+                        app.FcminEditFieldLabel.Visible = 'on';
+                        app.FcmaxEditField.Visible = 'on';
+                        app.FcmaxEditFieldLabel.Visible = 'on';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'off';
+                        app.FcEditFieldLabel.Visible = 'off';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'on';                  
+                        app.RpEditFieldLabel.Visible = 'on';
+                        app.RsEditField.Visible = 'off';                  
+                        app.RsEditFieldLabel.Visible = 'off';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                    case 'Band-Pass' 
+                        app.Schimb2 = 3;
+                        app.FcminEditField.Visible = 'on';
+                        app.FcminEditFieldLabel.Visible = 'on';
+                        app.FcmaxEditField.Visible = 'on';
+                        app.FcmaxEditFieldLabel.Visible = 'on';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'off';
+                        app.FcEditFieldLabel.Visible = 'off';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'on';                  
+                        app.RpEditFieldLabel.Visible = 'on';
+                        app.RsEditField.Visible = 'off';                  
+                        app.RsEditFieldLabel.Visible = 'off';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                    case 'High-Pass'
+                        app.Schimb2 = 4;
+                        app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                        app.FsEditField.Visible = 'on';
+                        app.FsEditFieldLabel.Visible = 'on';
+                        app.FcEditField.Visible = 'on';
+                        app.FcEditFieldLabel.Visible = 'on';
+                        app.OrdinEditField.Visible = 'on';                  
+                        app.OrdinEditFieldLabel.Visible = 'on';
+                        app.RpEditField.Visible = 'on';                  
+                        app.RpEditFieldLabel.Visible = 'on';
+                        app.RsEditField.Visible = 'off';                  
+                        app.RsEditFieldLabel.Visible = 'off';
+                        app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                     
+                        
+                end
+        end
+        if app.Schimb == 1
+            value1 = app.ResponseTypeDropDown.Value;
+            switch value1 
+                case 'Low-Pass'
+                    app.Schimb1 = 1;
+                    app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                    app.FsEditField.Visible = 'on';
+                    app.FsEditFieldLabel.Visible = 'on';
+                    app.FcEditField.Visible = 'on';
+                    app.FcEditFieldLabel.Visible = 'on';
+                    app.OrdinEditField.Visible = 'on';                  
+                    app.OrdinEditFieldLabel.Visible = 'on';
+                    app.RpEditField.Visible = 'off';                  
+                    app.RpEditFieldLabel.Visible = 'off';
+                    app.RsEditField.Visible = 'off';                  
+                    app.RsEditFieldLabel.Visible = 'off';
+                    app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                case 'Band-Stop'   
+                    app.Schimb1 = 2;
+                    app.FcminEditField.Visible = 'on';
+                        app.FcminEditFieldLabel.Visible = 'on';
+                        app.FcmaxEditField.Visible = 'on';
+                        app.FcmaxEditFieldLabel.Visible = 'on';
+                    app.FsEditField.Visible = 'on';
+                    app.FsEditFieldLabel.Visible = 'on';
+                    app.FcEditField.Visible = 'off';
+                    app.FcEditFieldLabel.Visible = 'off';
+                    app.OrdinEditField.Visible = 'on';                  
+                    app.OrdinEditFieldLabel.Visible = 'on';
+                    app.RpEditField.Visible = 'off';                  
+                    app.RpEditFieldLabel.Visible = 'off';
+                    app.RsEditField.Visible = 'off';                  
+                    app.RsEditFieldLabel.Visible = 'off';
+                    app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                case 'Band-Pass' 
+                    app.Schimb1 = 3;
+                      app.FcminEditField.Visible = 'on';
+                        app.FcminEditFieldLabel.Visible = 'on';
+                        app.FcmaxEditField.Visible = 'on';
+                        app.FcmaxEditFieldLabel.Visible = 'on';
+                    app.FsEditField.Visible = 'on';
+                    app.FsEditFieldLabel.Visible = 'on';
+                    app.FcEditField.Visible = 'off';
+                    app.FcEditFieldLabel.Visible = 'off';
+                    app.OrdinEditField.Visible = 'on';                  
+                    app.OrdinEditFieldLabel.Visible = 'on';
+                    app.RpEditField.Visible = 'off';                  
+                    app.RpEditFieldLabel.Visible = 'off';
+                    app.RsEditField.Visible = 'off';                  
+                    app.RsEditFieldLabel.Visible = 'off';
+                    app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                case 'High-Pass'
+                    app.Schimb1 = 4;
+                    app.FcminEditField.Visible = 'off';
+                        app.FcminEditFieldLabel.Visible = 'off';
+                        app.FcmaxEditField.Visible = 'off';
+                        app.FcmaxEditFieldLabel.Visible = 'off';
+                    app.FsEditField.Visible = 'on';
+                    app.FsEditFieldLabel.Visible = 'on';
+                    app.FcEditField.Visible = 'on';
+                    app.FcEditFieldLabel.Visible = 'on';
+                    app.OrdinEditField.Visible = 'on';                  
+                    app.OrdinEditFieldLabel.Visible = 'on';
+                    app.RpEditField.Visible = 'off';                  
+                    app.RpEditFieldLabel.Visible = 'off';
+                    app.RsEditField.Visible = 'off';                  
+                    app.RsEditFieldLabel.Visible = 'off';
+                    app.R1EditField.Visible = 'off';
+                        app.R1EditFieldLabel.Visible = 'off';
+                        app.R2EditField.Visible = 'off';
+                        app.R2EditFieldLabel.Visible = 'off';
+                        app.R3EditField.Visible = 'off';
+                        app.R3EditFieldLabel.Visible = 'off';
+                        app.V1EditField.Visible = 'off';
+                        app.V1EditFieldLabel.Visible = 'off';
+                        app.Image.Visible = 'off';
+                        app.TextArea.Visible = 'off';
+                 
+                    
+            end
+        end
+        end
+
+        % Button pushed function: ClearButton
+        function ClearButtonPushed(app, event)
+             cla(app.UIAxes);
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Color = [0.902 0.902 0.902];
+            app.UIFigure.Position = [100 100 635 480];
+            app.UIFigure.Name = 'UI Figure';
+
+            % Create LoadButton
+            app.LoadButton = uibutton(app.UIFigure, 'push');
+            app.LoadButton.ButtonPushedFcn = createCallbackFcn(app, @LoadButtonPushed, true);
+            app.LoadButton.FontColor = [0 0.4471 0.7412];
+            app.LoadButton.Position = [536 435 100 22];
+            app.LoadButton.Text = 'Load';
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, '')
+            xlabel(app.UIAxes, 'Frequency')
+            ylabel(app.UIAxes, 'Attenuation')
+            app.UIAxes.AmbientLightColor = [0.902 0.902 0.902];
+            app.UIAxes.XColor = [0 0.4471 0.7412];
+            app.UIAxes.YColor = [0 0.4471 0.7412];
+            app.UIAxes.ZColor = [0 0.4471 0.7412];
+            app.UIAxes.Color = [0.902 0.902 0.902];
+            app.UIAxes.NextPlot = 'add';
+            app.UIAxes.BackgroundColor = [0.902 0.902 0.902];
+            app.UIAxes.Position = [215 1 426 362];
+
+            % Create TipFiltruLabel
+            app.TipFiltruLabel = uilabel(app.UIFigure);
+            app.TipFiltruLabel.BackgroundColor = [0.902 0.902 0.902];
+            app.TipFiltruLabel.HorizontalAlignment = 'right';
+            app.TipFiltruLabel.FontColor = [0 0.4471 0.7412];
+            app.TipFiltruLabel.Position = [32 435 56 22];
+            app.TipFiltruLabel.Text = 'Tip Filtru';
+
+            % Create TipFiltruDropDown
+            app.TipFiltruDropDown = uidropdown(app.UIFigure);
+            app.TipFiltruDropDown.Items = {'Butterworth', 'Chebyshev I', 'Chebyshev II', 'Eliptic', 'Simulare1'};
+            app.TipFiltruDropDown.ValueChangedFcn = createCallbackFcn(app, @TipFiltruDropDownValueChanged, true);
+            app.TipFiltruDropDown.FontColor = [0 0.4471 0.7412];
+            app.TipFiltruDropDown.BackgroundColor = [0.902 0.902 0.902];
+            app.TipFiltruDropDown.Position = [99 435 100 22];
+            app.TipFiltruDropDown.Value = 'Butterworth';
+
+            % Create ResponseTypeDropDownLabel
+            app.ResponseTypeDropDownLabel = uilabel(app.UIFigure);
+            app.ResponseTypeDropDownLabel.BackgroundColor = [0.902 0.902 0.902];
+            app.ResponseTypeDropDownLabel.HorizontalAlignment = 'right';
+            app.ResponseTypeDropDownLabel.FontColor = [0 0.4471 0.7412];
+            app.ResponseTypeDropDownLabel.Position = [1 403 89 22];
+            app.ResponseTypeDropDownLabel.Text = 'Response Type';
+
+            % Create ResponseTypeDropDown
+            app.ResponseTypeDropDown = uidropdown(app.UIFigure);
+            app.ResponseTypeDropDown.Items = {'Low-Pass', 'Band-Stop', 'Band-Pass', 'High-Pass'};
+            app.ResponseTypeDropDown.ValueChangedFcn = createCallbackFcn(app, @TipFiltruDropDownValueChanged, true);
+            app.ResponseTypeDropDown.FontColor = [0 0.4471 0.7412];
+            app.ResponseTypeDropDown.BackgroundColor = [0.902 0.902 0.902];
+            app.ResponseTypeDropDown.Position = [105 403 94 22];
+            app.ResponseTypeDropDown.Value = 'Low-Pass';
+
+            % Create FsEditFieldLabel
+            app.FsEditFieldLabel = uilabel(app.UIFigure);
+            app.FsEditFieldLabel.HorizontalAlignment = 'right';
+            app.FsEditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.FsEditFieldLabel.Position = [31 292 25 22];
+            app.FsEditFieldLabel.Text = 'Fs';
+
+            % Create FsEditField
+            app.FsEditField = uieditfield(app.UIFigure, 'numeric');
+            app.FsEditField.FontColor = [0 0.4471 0.7412];
+            app.FsEditField.Position = [71 292 100 22];
+
+            % Create FcEditFieldLabel
+            app.FcEditFieldLabel = uilabel(app.UIFigure);
+            app.FcEditFieldLabel.HorizontalAlignment = 'right';
+            app.FcEditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.FcEditFieldLabel.Position = [31 328 25 22];
+            app.FcEditFieldLabel.Text = 'Fc';
+
+            % Create FcEditField
+            app.FcEditField = uieditfield(app.UIFigure, 'numeric');
+            app.FcEditField.FontColor = [0 0.4471 0.7412];
+            app.FcEditField.Position = [71 328 100 22];
+
+            % Create OrdinEditFieldLabel
+            app.OrdinEditFieldLabel = uilabel(app.UIFigure);
+            app.OrdinEditFieldLabel.HorizontalAlignment = 'right';
+            app.OrdinEditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.OrdinEditFieldLabel.Position = [21 362 35 22];
+            app.OrdinEditFieldLabel.Text = 'Ordin';
+
+            % Create OrdinEditField
+            app.OrdinEditField = uieditfield(app.UIFigure, 'numeric');
+            app.OrdinEditField.FontColor = [0 0.4471 0.7412];
+            app.OrdinEditField.Position = [71 362 100 22];
+
+            % Create RpEditFieldLabel
+            app.RpEditFieldLabel = uilabel(app.UIFigure);
+            app.RpEditFieldLabel.HorizontalAlignment = 'right';
+            app.RpEditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.RpEditFieldLabel.Position = [31 254 25 22];
+            app.RpEditFieldLabel.Text = 'Rp';
+
+            % Create RpEditField
+            app.RpEditField = uieditfield(app.UIFigure, 'numeric');
+            app.RpEditField.FontColor = [0 0.4471 0.7412];
+            app.RpEditField.Position = [71 254 100 22];
+
+            % Create RsEditFieldLabel
+            app.RsEditFieldLabel = uilabel(app.UIFigure);
+            app.RsEditFieldLabel.HorizontalAlignment = 'right';
+            app.RsEditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.RsEditFieldLabel.Position = [31 218 25 22];
+            app.RsEditFieldLabel.Text = 'Rs';
+
+            % Create RsEditField
+            app.RsEditField = uieditfield(app.UIFigure, 'numeric');
+            app.RsEditField.FontColor = [0 0.4471 0.7412];
+            app.RsEditField.Position = [71 218 100 22];
+
+            % Create FcminEditFieldLabel
+            app.FcminEditFieldLabel = uilabel(app.UIFigure);
+            app.FcminEditFieldLabel.HorizontalAlignment = 'right';
+            app.FcminEditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.FcminEditFieldLabel.Position = [18 184 38 22];
+            app.FcminEditFieldLabel.Text = 'Fcmin';
+
+            % Create FcminEditField
+            app.FcminEditField = uieditfield(app.UIFigure, 'numeric');
+            app.FcminEditField.FontColor = [0 0.4471 0.7412];
+            app.FcminEditField.Position = [71 184 100 22];
+
+            % Create FcmaxEditFieldLabel
+            app.FcmaxEditFieldLabel = uilabel(app.UIFigure);
+            app.FcmaxEditFieldLabel.HorizontalAlignment = 'right';
+            app.FcmaxEditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.FcmaxEditFieldLabel.Position = [15 146 41 22];
+            app.FcmaxEditFieldLabel.Text = 'Fcmax';
+
+            % Create FcmaxEditField
+            app.FcmaxEditField = uieditfield(app.UIFigure, 'numeric');
+            app.FcmaxEditField.FontColor = [0 0.4471 0.7412];
+            app.FcmaxEditField.Position = [71 146 100 22];
+
+            % Create R1EditFieldLabel
+            app.R1EditFieldLabel = uilabel(app.UIFigure);
+            app.R1EditFieldLabel.HorizontalAlignment = 'right';
+            app.R1EditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.R1EditFieldLabel.Position = [31 362 25 22];
+            app.R1EditFieldLabel.Text = 'R1';
+
+            % Create R1EditField
+            app.R1EditField = uieditfield(app.UIFigure, 'numeric');
+            app.R1EditField.FontColor = [0 0.4471 0.7412];
+            app.R1EditField.Position = [71 362 100 22];
+
+            % Create R2EditFieldLabel
+            app.R2EditFieldLabel = uilabel(app.UIFigure);
+            app.R2EditFieldLabel.HorizontalAlignment = 'right';
+            app.R2EditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.R2EditFieldLabel.Position = [31 328 25 22];
+            app.R2EditFieldLabel.Text = 'R2';
+
+            % Create R2EditField
+            app.R2EditField = uieditfield(app.UIFigure, 'numeric');
+            app.R2EditField.FontColor = [0 0.4471 0.7412];
+            app.R2EditField.Position = [71 328 100 22];
+
+            % Create R3EditFieldLabel
+            app.R3EditFieldLabel = uilabel(app.UIFigure);
+            app.R3EditFieldLabel.HorizontalAlignment = 'right';
+            app.R3EditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.R3EditFieldLabel.Position = [31 292 25 22];
+            app.R3EditFieldLabel.Text = 'R3';
+
+            % Create R3EditField
+            app.R3EditField = uieditfield(app.UIFigure, 'numeric');
+            app.R3EditField.FontColor = [0 0.4471 0.7412];
+            app.R3EditField.Position = [71 292 100 22];
+
+            % Create V1EditFieldLabel
+            app.V1EditFieldLabel = uilabel(app.UIFigure);
+            app.V1EditFieldLabel.HorizontalAlignment = 'right';
+            app.V1EditFieldLabel.FontColor = [0 0.4471 0.7412];
+            app.V1EditFieldLabel.Position = [31 254 25 22];
+            app.V1EditFieldLabel.Text = 'V1';
+
+            % Create V1EditField
+            app.V1EditField = uieditfield(app.UIFigure, 'numeric');
+            app.V1EditField.FontColor = [0 0.4471 0.7412];
+            app.V1EditField.Position = [71 254 100 22];
+
+            % Create Image
+            app.Image = uiimage(app.UIFigure);
+            app.Image.BackgroundColor = [0.902 0.902 0.902];
+            app.Image.Position = [-5 1 221 184];
+            app.Image.ImageSource = 'Screenshot_1.png';
+
+            % Create TextArea
+            app.TextArea = uitextarea(app.UIFigure);
+            app.TextArea.FontColor = [0 0.4471 0.7412];
+            app.TextArea.BackgroundColor = [0.902 0.902 0.902];
+            app.TextArea.Position = [295 362 174 116];
+
+            % Create ClearButton
+            app.ClearButton = uibutton(app.UIFigure, 'push');
+            app.ClearButton.ButtonPushedFcn = createCallbackFcn(app, @ClearButtonPushed, true);
+            app.ClearButton.FontColor = [0 0.4471 0.7412];
+            app.ClearButton.Position = [537 403 100 22];
+            app.ClearButton.Text = 'Clear';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = app1
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
